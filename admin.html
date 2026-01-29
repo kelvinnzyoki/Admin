@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<div class="admin-layout">
+  
+  <!-- ========================
+       SIDEBAR
+  ======================== -->
+  <aside class="sidebar">
+    <h2>Admin Panel</h2>
+    <a href="#" class="active">Dashboard</a>
+    <a href="#" onclick="loadAudits()">Audit Logs</a>
+    <a href="#">Moderation</a>
+    <a href="#" onclick="API.logout()">Logout</a>
+  </aside>
+
+  <!-- ========================
+       MAIN CONTENT
+  ======================== -->
+  <main class="main-content">
+    <div class="admin-header">
+      <h1>Dashboard</h1>
+    </div>
+
+    <!-- ========================
+         STATS CARDS
+    ======================== -->
+    <div class="stats-grid">
+      <div class="card">
+        <div class="card-title">Total Users</div>
+        <div class="stat-number" id="total-users">--</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Total Recovery Logs</div>
+        <div class="stat-number" id="total-recovery">--</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Total Audits</div>
+        <div class="stat-number" id="total-audits">--</div>
+      </div>
+    </div>
+
+    <!-- ========================
+         AUDIT LOG TABLE
+    ======================== -->
+    <div class="card" style="margin-top: 30px;">
+      <div class="card-title">Audit Logs</div>
+      <table class="table" id="audit-table">
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>Victory</th>
+            <th>Defeat</th>
+            <th>Last Updated</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Audit rows will be populated via JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ========================
+         MODERATION PANEL
+    ======================== -->
+    <div class="card" style="margin-top: 30px;">
+      <div class="card-title">Moderation</div>
+      <div id="moderation-list">
+        <!-- Example -->
+        <div class="moderation-box">
+          <span>User 123</span>
+          <button class="btn btn-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+</div>
+
+
+<script src="admin.js"></script>
+
+</body>
+</html>
