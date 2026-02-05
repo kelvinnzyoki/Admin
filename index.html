@@ -3,154 +3,283 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TAM Admin Dashboard</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Dashboard Diagnostics</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #1a1a1a;
+      color: #00ff00;
+      padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .test {
+      background: #2a2a2a;
+      padding: 15px;
+      margin: 10px 0;
+      border-left: 4px solid #666;
+    }
+    .pass { border-left-color: #00ff00; }
+    .fail { border-left-color: #ff0000; }
+    .warn { border-left-color: #ffaa00; }
+    h1 { color: #00aaff; }
+    h2 { color: #00ffaa; margin-top: 30px; }
+    pre { 
+      background: #0a0a0a; 
+      padding: 10px; 
+      overflow-x: auto;
+      border: 1px solid #333;
+    }
+    button {
+      background: #00aaff;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 10px 5px;
+    }
+    button:hover { background: #00ccff; }
+    .info { color: #ffaa00; }
+  </style>
 </head>
 <body>
+  <h1>🔍 TAM Dashboard Diagnostics</h1>
+  <p class="info">This tool will help identify why your dashboard shows "failed to fetch"</p>
 
-<div class="admin-layout">
-  
-  <!-- ========================
-       SIDEBAR
-  ======================== -->
-  <aside class="sidebar">
-    <h2>TAM Admin</h2>
-    <a href="#" class="active" onclick="showSection('dashboard')">Dashboard</a>
-    <a href="#" onclick="showSection('users')">Users</a>
-    <a href="#" onclick="showSection('analytics')">Analytics</a>
-    <a href="#" onclick="loadAudits()">Audit Logs</a>
-    <a href="#" onclick="API.logout()">Logout</a>
-  </aside>
+  <button onclick="runAllTests()">Run All Tests</button>
+  <button onclick="clearResults()">Clear Results</button>
 
-  <!-- ========================
-       MAIN CONTENT
-  ======================== -->
-  <main class="main-content">
-    
-    <!-- DASHBOARD SECTION -->
-    <div id="dashboard-section" class="admin-section">
-      <div class="admin-header">
-        <h1>Dashboard</h1>
-        <div style="font-size: 0.8rem; color: var(--text-muted);">
-          Auto-refreshes every 30 seconds
-        </div>
-      </div>
+  <div id="results"></div>
 
-      <!-- ========================
-           STATS CARDS
-      ======================== -->
-      <div class="stats-grid">
-        <div class="card">
-          <div class="card-title">Total Users</div>
-          <div class="stat-number" id="total-users">--</div>
-          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">
-            Registered accounts
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-title">Recovery Logs</div>
-          <div class="stat-number" id="total-recovery">--</div>
-          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">
-            Total entries
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-title">Audit Logs</div>
-          <div class="stat-number" id="total-audits">--</div>
-          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">
-            Active audits
-          </div>
-        </div>
-      </div>
+  <script>
+    const API_BASE = 'https://cctamcc.site'; // Change this to your server URL
+    let results = document.getElementById('results');
 
-      <!-- ========================
-           RECENT ACTIVITIES
-      ======================== -->
-      <div class="card" style="margin-top: 30px;">
-        <div class="card-title">Recent Activity</div>
-        <div id="activity-feed" style="max-height: 400px; overflow-y: auto;">
-          <!-- Activities will be populated via JS -->
-          <p style="text-align: center; padding: 20px; color: var(--text-muted);">
-            Loading activities...
-          </p>
-        </div>
-      </div>
+    function addResult(title, status, message, data = null) {
+      const div = document.createElement('div');
+      div.className = `test ${status}`;
+      div.innerHTML = `
+        <h3>${title}</h3>
+        <p>${message}</p>
+        ${data ? `<pre>${JSON.stringify(data, null, 2)}</pre>` : ''}
+      `;
+      results.appendChild(div);
+    }
 
-      <!-- ========================
-           AUDIT LOG TABLE
-      ======================== -->
-      <div class="card" style="margin-top: 30px;">
-        <div class="card-title">Latest Audit Logs</div>
-        <table class="table" id="audit-table">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Victory</th>
-              <th>Defeat</th>
-              <th>Last Updated</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">
-                Loading audit logs...
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    function clearResults() {
+      results.innerHTML = '';
+    }
 
-    <!-- USERS SECTION -->
-    <div id="users-section" class="admin-section" style="display: none;">
-      <div class="admin-header">
-        <h1>User Management</h1>
-        <button class="btn btn-primary" onclick="loadUsers()">
-          Refresh
-        </button>
-      </div>
+    async function test1_ServerReachable() {
+      addResult('Test 1: Server Reachable', 'warn', 'Testing server connection...');
+      
+      try {
+        const response = await fetch(`${API_BASE}/`, {
+          method: 'GET'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          addResult('Test 1: Server Reachable', 'pass', 
+            `✅ Server is online and responding`, data);
+        } else {
+          addResult('Test 1: Server Reachable', 'fail', 
+            `❌ Server returned status ${response.status}`);
+        }
+      } catch (err) {
+        addResult('Test 1: Server Reachable', 'fail', 
+          `❌ Cannot reach server: ${err.message}`, { error: err.message });
+      }
+    }
 
-      <div class="card">
-        <div class="card-title">All Users</div>
-        <div id="moderation-list">
-          <p style="text-align: center; padding: 20px; color: var(--text-muted);">
-            Loading users...
-          </p>
-        </div>
-      </div>
-    </div>
+    async function test2_CORSHeaders() {
+      addResult('Test 2: CORS Configuration', 'warn', 'Checking CORS headers...');
+      
+      try {
+        const response = await fetch(`${API_BASE}/`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+        
+        const corsHeader = response.headers.get('access-control-allow-credentials');
+        
+        if (corsHeader === 'true') {
+          addResult('Test 2: CORS Configuration', 'pass', 
+            '✅ CORS is properly configured for credentials');
+        } else {
+          addResult('Test 2: CORS Configuration', 'fail', 
+            '❌ CORS not allowing credentials. Check server CORS config.', 
+            { 
+              current_origin: window.location.origin,
+              cors_credentials: corsHeader 
+            });
+        }
+      } catch (err) {
+        addResult('Test 2: CORS Configuration', 'fail', 
+          `❌ CORS test failed: ${err.message}`);
+      }
+    }
 
-    <!-- ANALYTICS SECTION -->
-    <div id="analytics-section" class="admin-section" style="display: none;">
-      <div class="admin-header">
-        <h1>Analytics</h1>
-      </div>
+    async function test3_CookiePresent() {
+      addResult('Test 3: Authentication Cookie', 'warn', 'Checking for access_token cookie...');
+      
+      const cookies = document.cookie;
+      const hasAccessToken = cookies.includes('access_token');
+      const hasRefreshToken = cookies.includes('refresh_token');
+      
+      if (hasAccessToken) {
+        addResult('Test 3: Authentication Cookie', 'pass', 
+          '✅ Access token cookie found. You are logged in.', 
+          { cookies: cookies.split(';').map(c => c.trim()) });
+      } else if (hasRefreshToken) {
+        addResult('Test 3: Authentication Cookie', 'warn', 
+          '⚠️ Refresh token found but no access token. Try refreshing the page.', 
+          { cookies: cookies.split(';').map(c => c.trim()) });
+      } else {
+        addResult('Test 3: Authentication Cookie', 'fail', 
+          '❌ No authentication cookies found. You need to log in first.', 
+          { 
+            message: 'Please log in at your main app first, then return to admin dashboard',
+            current_cookies: cookies || 'none'
+          });
+      }
+    }
 
-      <!-- User Growth Chart -->
-      <div class="card">
-        <div class="card-title">User Growth (Last 30 Days)</div>
-        <div id="user-growth-chart" style="height: 150px; display: flex; align-items: flex-end; padding: 10px;">
-          <p style="color: var(--text-muted);">Loading chart...</p>
-        </div>
-      </div>
+    async function test4_AdminStatsEndpoint() {
+      addResult('Test 4: Admin Stats Endpoint', 'warn', 'Testing /admin/stats endpoint...');
+      
+      try {
+        const response = await fetch(`${API_BASE}/admin/stats`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.status === 401) {
+          addResult('Test 4: Admin Stats Endpoint', 'fail', 
+            '❌ Unauthenticated (401). You need to log in first.');
+          return;
+        }
+        
+        if (response.status === 403) {
+          addResult('Test 4: Admin Stats Endpoint', 'fail', 
+            '❌ Forbidden (403). Your account is not an admin. Run: UPDATE users SET role=\'admin\' WHERE email=\'your@email.com\';');
+          return;
+        }
+        
+        if (response.ok) {
+          const data = await response.json();
+          addResult('Test 4: Admin Stats Endpoint', 'pass', 
+            '✅ Admin endpoint working! You have admin access.', data);
+        } else {
+          addResult('Test 4: Admin Stats Endpoint', 'fail', 
+            `❌ Unexpected status: ${response.status}`);
+        }
+      } catch (err) {
+        addResult('Test 4: Admin Stats Endpoint', 'fail', 
+          `❌ Request failed: ${err.message}`, { error: err.message });
+      }
+    }
 
-      <!-- Activity Stats -->
-      <div class="card" style="margin-top: 30px;">
-        <div class="card-title">Activity Breakdown (Last 7 Days)</div>
-        <div id="activity-stats-chart">
-          <p style="text-align: center; padding: 20px; color: var(--text-muted);">
-            Loading stats...
-          </p>
-        </div>
-      </div>
-    </div>
+    async function test5_AdminAuditsEndpoint() {
+      addResult('Test 5: Admin Audits Endpoint', 'warn', 'Testing /admin/audits endpoint...');
+      
+      try {
+        const response = await fetch(`${API_BASE}/admin/audits`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          addResult('Test 5: Admin Audits Endpoint', 'pass', 
+            `✅ Audits endpoint working! Found ${data.length} audits.`, 
+            data.slice(0, 2)); // Show first 2
+        } else {
+          addResult('Test 5: Admin Audits Endpoint', 'fail', 
+            `❌ Status: ${response.status}. ${response.status === 403 ? 'Not admin' : 'Check server logs'}`);
+        }
+      } catch (err) {
+        addResult('Test 5: Admin Audits Endpoint', 'fail', 
+          `❌ Request failed: ${err.message}`);
+      }
+    }
 
-  </main>
+    async function test6_DatabaseTables() {
+      addResult('Test 6: Database Schema Check', 'warn', 
+        'Checking if activity_logs table exists by trying to fetch activities...');
+      
+      try {
+        const response = await fetch(`${API_BASE}/admin/activities?limit=1`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          addResult('Test 6: Database Schema Check', 'pass', 
+            '✅ Database schema is correct. activity_logs table exists.');
+        } else if (response.status === 500) {
+          addResult('Test 6: Database Schema Check', 'fail', 
+            '❌ Database error. Did you run database-migration.sql?', 
+            { action: 'Run: psql $DATABASE_URL -f database-migration.sql' });
+        } else {
+          addResult('Test 6: Database Schema Check', 'warn', 
+            `⚠️ Status ${response.status}. May be auth issue, not DB.`);
+        }
+      } catch (err) {
+        addResult('Test 6: Database Schema Check', 'fail', 
+          `❌ Cannot test: ${err.message}`);
+      }
+    }
 
-</div>
+    async function runAllTests() {
+      clearResults();
+      
+      addResult('Starting Diagnostics', 'warn', 
+        `Testing connection to: ${API_BASE}`);
+      
+      await test1_ServerReachable();
+      await new Promise(r => setTimeout(r, 500));
+      
+      await test2_CORSHeaders();
+      await new Promise(r => setTimeout(r, 500));
+      
+      await test3_CookiePresent();
+      await new Promise(r => setTimeout(r, 500));
+      
+      await test4_AdminStatsEndpoint();
+      await new Promise(r => setTimeout(r, 500));
+      
+      await test5_AdminAuditsEndpoint();
+      await new Promise(r => setTimeout(r, 500));
+      
+      await test6_DatabaseTables();
+      
+      addResult('Diagnostics Complete', 'warn', 
+        'Check results above. Common fixes below:', {
+          'Not logged in': 'Go to your main app and log in first',
+          'Not admin': 'Run SQL: UPDATE users SET role=\'admin\' WHERE email=\'your@email.com\'',
+          'No database tables': 'Run: psql $DATABASE_URL -f database-migration.sql',
+          'CORS errors': 'Add your domain to CORS allowed origins in server.js',
+          'Wrong API URL': `Change API_BASE in script.js to your actual server URL`
+        });
+    }
 
-<script src="script.js"></script>
-
+    // Auto-run on load
+    window.addEventListener('DOMContentLoaded', () => {
+      addResult('System Info', 'warn', 'Current environment details', {
+        'Current URL': window.location.href,
+        'API Base': API_BASE,
+        'Browser': navigator.userAgent,
+        'Cookies Enabled': navigator.cookieEnabled
+      });
+    });
+  </script>
 </body>
 </html>
