@@ -2,7 +2,7 @@
 // API HELPER
 // ================================
 const API = {
-  baseURL: 'https://cctamcc.site', // Update to your server URL
+  baseURL: 'https://api.cctamcc.site', // Update to your server URL
   
   async request(endpoint, options = {}) {
     try {
