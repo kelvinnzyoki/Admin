@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TAM Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="admin-layout">
+  
+  <!-- ========================
+       SIDEBAR
+  ======================== -->
+  <aside class="sidebar">
+    <h2>TAM Admin</h2>
+    <a href="#" class="active" onclick="showSection('dashboard')">Dashboard</a>
+    <a href="#" onclick="showSection('users')">Users</a>
+    <a href="#" onclick="showSection('analytics')">Analytics</a>
+    <a href="#" onclick="loadAudits()">Audit Logs</a>
+    <a href="#" onclick="API.logout()">Logout</a>
+  </aside>
+
+  <!-- ========================
+       MAIN CONTENT
+  ======================== -->
+  <main class="main-content">
+    
+    <!-- DASHBOARD SECTION -->
+    <div id="dashboard-section" class="admin-section">
+      <div class="admin-header">
+        <h1>Dashboard</h1>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">
+          Auto-refreshes every 30 seconds
+        </div>
+      </div>
+
+      <!-- ========================
+           STATS CARDS
+      ======================== -->
+      <div class="stats-grid">
+        <div class="card">
+          <div class="card-title">Total Users</div>
+          <div class="stat-number" id="total-users">--</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">
+            Registered accounts
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Recovery Logs</div>
+          <div class="stat-number" id="total-recovery">--</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">
+            Total entries
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Audit Logs</div>
+          <div class="stat-number" id="total-audits">--</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">
+            Active audits
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================
+           RECENT ACTIVITIES
+      ======================== -->
+      <div class="card" style="margin-top: 30px;">
+        <div class="card-title">Recent Activity</div>
+        <div id="activity-feed" style="max-height: 400px; overflow-y: auto;">
+          <!-- Activities will be populated via JS -->
+          <p style="text-align: center; padding: 20px; color: var(--text-muted);">
+            Loading activities...
+          </p>
+        </div>
+      </div>
+
+      <!-- ========================
+           AUDIT LOG TABLE
+      ======================== -->
+      <div class="card" style="margin-top: 30px;">
+        <div class="card-title">Latest Audit Logs</div>
+        <table class="table" id="audit-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Victory</th>
+              <th>Defeat</th>
+              <th>Last Updated</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">
+                Loading audit logs...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- USERS SECTION -->
+    <div id="users-section" class="admin-section" style="display: none;">
+      <div class="admin-header">
+        <h1>User Management</h1>
+        <button class="btn btn-primary" onclick="loadUsers()">
+          Refresh
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">All Users</div>
+        <div id="moderation-list">
+          <p style="text-align: center; padding: 20px; color: var(--text-muted);">
+            Loading users...
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS SECTION -->
+    <div id="analytics-section" class="admin-section" style="display: none;">
+      <div class="admin-header">
+        <h1>Analytics</h1>
+      </div>
+
+      <!-- User Growth Chart -->
+      <div class="card">
+        <div class="card-title">User Growth (Last 30 Days)</div>
+        <div id="user-growth-chart" style="height: 150px; display: flex; align-items: flex-end; padding: 10px;">
+          <p style="color: var(--text-muted);">Loading chart...</p>
+        </div>
+      </div>
+
+      <!-- Activity Stats -->
+      <div class="card" style="margin-top: 30px;">
+        <div class="card-title">Activity Breakdown (Last 7 Days)</div>
+        <div id="activity-stats-chart">
+          <p style="text-align: center; padding: 20px; color: var(--text-muted);">
+            Loading stats...
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+            </html>
+            
